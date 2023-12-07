@@ -1,6 +1,6 @@
-from tqdm.auto import tqdm
-import matplotlib.patches as patches
-
+import torch
+import matplotlib.pyplot as plt
+import numpy as np
 # Define colors for bounding boxes
 colors = ['#FAFF00', '#8CF1FF']
 

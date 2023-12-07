@@ -1,83 +1,96 @@
 from tqdm.auto import tqdm
 import matplotlib.patches as patches
 
+# Define colors for bounding boxes
 colors = ['#FAFF00', '#8CF1FF']
 
-def get_patches(img, patch_size=256):
-    # add extra dimension for later calculations
-    img_patches = img.data.unfold(0,3,3)
-    # break the image into patches (in height dimension)
+def generate_patches(image, patch_size=256):
+    """
+    Generates patches from the input image.
+    """
+    # Add an extra dimension for later calculations
+    img_patches = image.data.unfold(0, 3, 3)
+    # Break the image into patches (in the height dimension)
     img_patches = img_patches.unfold(1, patch_size, patch_size)
-    # break the image into patches (in width dimension)
+    # Break the image into patches (in the width dimension)
     img_patches = img_patches.unfold(2, patch_size, patch_size)
     return img_patches
 
-def get_scores(img_patches, prompt, window=6, stride=1):
-    # initialize scores and runs arrays
+def calculate_scores(img_patches, prompt, window=6, stride=1):
+    """
+    Calculates similarity scores for image patches based on a given prompt.
+    """
+    # Initialize scores and runs arrays
     scores = torch.zeros(img_patches.shape[1], img_patches.shape[2])
     runs = torch.ones(img_patches.shape[1], img_patches.shape[2])
 
-    # iterate through patches
-    for Y in range(0, img_patches.shape[1]-window+1, stride):
-        for X in range(0, img_patches.shape[2]-window+1, stride):
-            # initialize array to store big patches
-            big_patch = torch.zeros(patch*window, patch*window, 3)
-            # get a single big patch
-            patch_batch = img_patches[0, Y:Y+window, X:X+window]
-            # iteratively build all big patches
+    # Iterate through patches
+    for Y in range(0, img_patches.shape[1] - window + 1, stride):
+        for X in range(0, img_patches.shape[2] - window + 1, stride):
+            # Initialize an array to store big patches
+            big_patch = torch.zeros(patch * window, patch * window, 3)
+            # Get a single big patch
+            patch_batch = img_patches[0, Y:Y + window, X:X + window]
+            # Iteratively build all big patches
             for y in range(window):
                 for x in range(window):
-                    big_patch[y*patch:(y+1)*patch, x*patch:(x+1)*patch, :] = patch_batch[y, x].permute(1, 2, 0)
+                    big_patch[y * patch:(y + 1) * patch, x * patch:(x + 1) * patch, :] = patch_batch[y, x].permute(1, 2, 0)
             inputs = processor(
-                images=big_patch, # image trasmitted to the model
-                return_tensors="pt", # return pytorch tensor
-                text=prompt, # text trasmitted to the model
+                images=big_patch,  # Image transmitted to the model
+                return_tensors="pt",  # Return PyTorch tensor
+                text=prompt,  # Text transmitted to the model
                 padding=True
-            ).to(device) # move to device if possible
+            ).to(device)  # Move to device if possible
 
             score = model(**inputs).logits_per_image.item()
-            # sum up similarity scores
-            scores[Y:Y+window, X:X+window] += score
-            # calculate the number of runs
-            runs[Y:Y+window, X:X+window] += 1
-    # calculate average scores
+            # Sum up similarity scores
+            scores[Y:Y + window, X:X + window] += score
+            # Calculate the number of runs
+            runs[Y:Y + window, X:X + window] += 1
+    # Calculate average scores
     scores /= runs
-    # clip scores
+    # Clip scores
     for _ in range(3):
-        scores = np.clip(scores-scores.mean(), 0, np.inf)
-    # normalize scores
+        scores = np.clip(scores - scores.mean(), 0, np.inf)
+    # Normalize scores
     scores = (scores - scores.min()) / (scores.max() - scores.min())
     return scores
 
-def get_box(scores, patch_size=256, threshold=0.5):
+def calculate_box(scores, patch_size=256, threshold=0.5):
+    """
+    Calculates the bounding box based on the detected scores.
+    """
     detection = scores > threshold
-    # find box corners
-    y_min, y_max = np.nonzero(detection)[:,0].min().item(), np.nonzero(detection)[:,0].max().item()+1
-    x_min, x_max = np.nonzero(detection)[:,1].min().item(), np.nonzero(detection)[:,1].max().item()+1
-    # convert from patch co-ords to pixel co-ords
+    # Find box corners
+    y_min, y_max = np.nonzero(detection)[:, 0].min().item(), np.nonzero(detection)[:, 0].max().item() + 1
+    x_min, x_max = np.nonzero(detection)[:, 1].min().item(), np.nonzero(detection)[:, 1].max().item() + 1
+    # Convert from patch coordinates to pixel coordinates
     y_min *= patch_size
     y_max *= patch_size
     x_min *= patch_size
     x_max *= patch_size
-    # calculate box height and width
+    # Calculate box height and width
     height = y_max - y_min
     width = x_max - x_min
     return x_min, y_min, width, height
 
-def detect(prompts, img, patch_size=256, window=6, stride=1, threshold=0.5):
-    # build image patches for detection
-    img_patches = get_patches(img, patch_size)
-    # convert image to format for displaying with matplotlib
-    image = np.moveaxis(img.data.numpy(), 0, -1)
-    # initialize plot to display image + bounding boxes
-    fig, ax = plt.subplots(figsize=(Y*0.5, X*0.5))
-    ax.imshow(image)
-    # process image through object detection steps
+def object_detection(prompts, image, patch_size=256, window=6, stride=1, threshold=0.5):
+    """
+    Performs object detection on the input image using the given prompts.
+    """
+    # Build image patches for detection
+    img_patches = generate_patches(image, patch_size)
+    # Convert image to a format for displaying with matplotlib
+    image_array = np.moveaxis(image.data.numpy(), 0, -1)
+    # Initialize a plot to display the image + bounding boxes
+    fig, ax = plt.subplots(figsize=(Y * 0.5, X * 0.5))
+    ax.imshow(image_array)
+    # Process image through object detection steps
     for i, prompt in enumerate(tqdm(prompts)):
-        scores = get_scores(img_patches, prompt, window, stride)
-        x, y, width, height = get_box(scores, patch_size, threshold)
-        # create the bounding box
+        scores = calculate_scores(img_patches, prompt, window, stride)
+        x, y, width, height = calculate_box(scores, patch_size, threshold)
+        # Create the bounding box
         rect = patches.Rectangle((x, y), width, height, linewidth=3, edgecolor=colors[i], facecolor='none')
-        # add the patch to the Axes
+        # Add the patch to the Axes
         ax.add_patch(rect)
     plt.show()

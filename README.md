@@ -2,7 +2,8 @@
 
 ## Overview
 
-ZSED is a project focused on implementing zero-shot embedding for object detection. The primary aim is to enhance object detection models, enabling them to identify and categorize objects not encountered during their training phase. This is accomplished through the application of advanced embedding techniques.
+Zero-shot embbeding detection for Object detction Applications to enhance the performance and accuracy of detection and recognation applications. This methodology expands the capabilities of traditional object detection systems by allowing them to recognize and classify objects even without specific training examples.
+
 
 ## Features
 

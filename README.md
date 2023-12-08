@@ -16,6 +16,14 @@ Zero-shot embbeding detection for Object detction Applications to enhance the pe
 To install and use ZSED, follow these steps:
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/Alaaeldinn/ZSED.git
    ```
+
+2. Install requirements:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+   

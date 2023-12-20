@@ -1,8 +1,8 @@
-# ZSED - Zero Shot Embedding Detection for Object Detection
+# ZSOD - Zero Shot Object Detection 
 
 ## Overview
 
-Zero-shot embbeding detection for Object detction Applications to enhance the performance and accuracy of detection and recognation applications. This methodology expands the capabilities of traditional object detection systems by allowing them to recognize and classify objects even without specific training examples.
+Zero-shot Object detection to enhance the performance and accuracy of detection and recognation applications. This methodology expands the capabilities of traditional object detection systems by allowing them to recognize and classify objects even without specific training examples.
 
 
 ## Features
@@ -13,12 +13,12 @@ Zero-shot embbeding detection for Object detction Applications to enhance the pe
 
 ## Installation
 
-To install and use ZSED, follow these steps:
+To install and use ZSOD, follow these steps:
 
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/Alaaeldinn/ZSED.git
+   git clone https://github.com/Alaaeldinn/ZSOD.git
    ```
 
 2. Install requirements:

@@ -18,7 +18,7 @@ class zsed:
         img_patches = img_patches.unfold(2, patch_size, patch_size)
         return img_patches
 
-    def calculate_scores(self, img_patches, prompt, window=6, stride=1):
+    def calculate_scores(self, img_patches, prompt, window=6, stride=1 , patch_size=256):
         scores = torch.zeros(img_patches.shape[1], img_patches.shape[2])
         runs = torch.ones(img_patches.shape[1], img_patches.shape[2])
 

@@ -5,7 +5,7 @@ from tqdm import tqdm
 import matplotlib.patches as patches
 
 
-class zsed:
+class ClipDetector:
     def __init__(self, model, processor, device):
         self.model = model
         self.processor = processor

@@ -22,7 +22,7 @@ the code is for just simple survey on using clip and owl-vit in zero shot object
 ## TODO 
 
 - [x] Task 1: Survey between clip and owl-vit.
-- [ ] Task 2: survey between clip and owl-vit and yolo-world and trained yolo.
+- [ ] Task 2: survey between clip and owl-vit and yolo-world.
 - [ ] Task 3: publishing results.
 
 ## Features
